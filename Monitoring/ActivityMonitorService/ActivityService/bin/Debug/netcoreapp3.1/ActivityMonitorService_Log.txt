@@ -1,0 +1,23 @@
+3/20/2021 12:43:42 AM- Listening to .*5050
+3/20/2021 12:43:48 AM - 0 tests started, 0 tests done, 0 tests active, 3/20/2021 12:43:42 AM last test started, 3/20/2021 12:43:42 AM last test done
+3/20/2021 12:43:48 AM - 0 tests started, 0 tests done, 0 tests active, 3/20/2021 12:43:42 AM last test started, 3/20/2021 12:43:42 AM last test done
+3/20/2021 12:43:52 AM - 0 tests started, 0 tests done, 0 tests active, 3/20/2021 12:43:42 AM last test started, 3/20/2021 12:43:42 AM last test done
+3/20/2021 12:43:52 AM - 0 tests started, 0 tests done, 0 tests active, 3/20/2021 12:43:42 AM last test started, 3/20/2021 12:43:42 AM last test done
+3/20/2021 12:43:57 AM - 0 tests started, 0 tests done, 0 tests active, 3/20/2021 12:43:42 AM last test started, 3/20/2021 12:43:42 AM last test done
+3/20/2021 12:43:57 AM - 0 tests started, 0 tests done, 0 tests active, 3/20/2021 12:43:42 AM last test started, 3/20/2021 12:43:42 AM last test done
+3/20/2021 12:44:02 AM - 0 tests started, 0 tests done, 0 tests active, 3/20/2021 12:43:42 AM last test started, 3/20/2021 12:43:42 AM last test done
+3/20/2021 12:44:02 AM - 0 tests started, 0 tests done, 0 tests active, 3/20/2021 12:43:42 AM last test started, 3/20/2021 12:43:42 AM last test done
+3/20/2021 12:44:07 AM - 0 tests started, 0 tests done, 0 tests active, 3/20/2021 12:43:42 AM last test started, 3/20/2021 12:43:42 AM last test done
+3/20/2021 12:44:07 AM - 0 tests started, 0 tests done, 0 tests active, 3/20/2021 12:43:42 AM last test started, 3/20/2021 12:43:42 AM last test done
+3/20/2021 12:44:12 AM - received message: hostname EMEABGDLT150, time 3/19/2021 11:44:11 PM, state start
+3/20/2021 12:44:12 AM - 1 tests started, 0 tests done, 1 tests active, 3/20/2021 12:44:12 AM last test started, 3/20/2021 12:43:42 AM last test done
+3/20/2021 12:44:17 AM - 1 tests started, 0 tests done, 1 tests active, 3/20/2021 12:44:12 AM last test started, 3/20/2021 12:43:42 AM last test done
+3/20/2021 12:44:22 AM - 1 tests started, 0 tests done, 1 tests active, 3/20/2021 12:44:12 AM last test started, 3/20/2021 12:43:42 AM last test done
+3/20/2021 12:44:27 AM - 1 tests started, 0 tests done, 1 tests active, 3/20/2021 12:44:12 AM last test started, 3/20/2021 12:43:42 AM last test done
+3/20/2021 12:44:29 AM - received message: hostname EMEABGDLT150, time 3/19/2021 11:44:29 PM, state stop
+3/20/2021 12:44:32 AM - 1 tests started, 1 tests done, 0 tests active, 3/20/2021 12:44:12 AM last test started, 3/20/2021 12:44:29 AM last test done
+3/20/2021 12:44:32 AM - 1 tests started, 1 tests done, 0 tests active, 3/20/2021 12:44:12 AM last test started, 3/20/2021 12:44:29 AM last test done
+3/20/2021 12:44:37 AM - 1 tests started, 1 tests done, 0 tests active, 3/20/2021 12:44:12 AM last test started, 3/20/2021 12:44:29 AM last test done
+3/20/2021 12:44:37 AM - 1 tests started, 1 tests done, 0 tests active, 3/20/2021 12:44:12 AM last test started, 3/20/2021 12:44:29 AM last test done
+3/20/2021 12:44:42 AM - 1 tests started, 1 tests done, 0 tests active, 3/20/2021 12:44:12 AM last test started, 3/20/2021 12:44:29 AM last test done
+3/20/2021 12:44:42 AM - 1 tests started, 1 tests done, 0 tests active, 3/20/2021 12:44:12 AM last test started, 3/20/2021 12:44:29 AM last test done
