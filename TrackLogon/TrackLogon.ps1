@@ -2,8 +2,7 @@
 This script provides tacking logon activity on specific server.
 
 Input parameters: 
-	1) $Computer - Name of the computer you want to get info from (Default value: $env:COMPUTERNAME)
-	2) $Days - Number of past days to get log info (Default value: 1)
+	1) $Days - Number of past days to get log info (Default value: 1)
 	
 Output parameters:
 	Script returns Name, Time and Event (Login/Logoff)
@@ -13,25 +12,27 @@ Date: 24-Mar-2021
 #>
 
 param(
-	[String]$Computer = $env:COMPUTERNAME, 
 	[Int]$Days = 1
 	)
+
+$logs = Get-WinEvent -FilterHashTable @{
+	LogName='Security';
+	Id=4624;
+	StartTime=(Get-Date).AddDays(-$Days)} |
+	Where { $_.Message | Select-String "Logon Type:\s+7"}
+$res = @();
+ForEach($log in $logs){
+	$message = $log | select -expand message | findstr /c:"Account Name:"
 	
-$logs = Get-Eventlog System -ComputerName $Computer -source Microsoft-Windows-Winlogon -After (Get-Date).AddDays(-$Days);
-$res = @(); 
-ForEach ($log in $logs) {
-	if($log.instanceid -eq 7001) {
-		$type = "Logon"
-	} 
-	Elseif ($log.instanceid -eq 7002){
-		$type="Logoff"
-	} 
-	Else {
-		Continue
-	} 
-	$res += New-Object PSObject -Property @{
-		Time = $log.TimeWritten; 
-		"Event" = $type; 
-		User = (New-Object System.Security.Principal.SecurityIdentifier $Log.ReplacementStrings[1])
-			.Translate([System.Security.Principal.NTAccount])}};
+	if($prev){
+		$span = NEW-TIMESPAN –Start $log.TimeCreated –End $prev.TimeCreated
+		if($span.TotalSeconds -gt 1){
+			$res += New-Object PSObject -Property @{
+				Time = $log.TimeCreated
+				User = $message[1] -replace '\s+', ' '
+			}
+		}
+	}
+	$prev = $log
+}
 $res
