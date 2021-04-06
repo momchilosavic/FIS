@@ -50,7 +50,7 @@ if(-not (($Members.Length -eq 1) -and ($Members[0] -eq ""))){
 if(-not ($TrustedHosts -eq "")){
 	"`n`t--------------------WinRM Setup Started--------------------"											# PRINT
 	"`n`t`tAdding $TrustedHosts as trusted host(s)"																# PRINT
-	Set-Item WSMan:\localhost\Client\TrustedHosts $TrustedHosts
+	Set-Item WSMan:\localhost\Client\TrustedHosts $TrustedHosts -Force
 	Set-Item WSMan:\localhost\Client\AllowUnencrypted true
 	Get-Service -Name WinRM | Restart-Service
 	gci WSMan:\localhost\Client
@@ -62,7 +62,7 @@ if(-not (($BuildToolsVersions.Length -eq 1) -and ($BuildToolsVersions[0] -eq "")
 	"`n`t--------------------Installing software--------------------"												# PRINT
 	foreach($version in $BuildToolsVersions){
 		"`n`t`tInstalling $path_pre$version$path_suf"								# PRINT
-		Start-Process -FilePath $path_pre$version$path_suf	-ArgumentList " --allWorkloads --includeRecommended --add Microsoft.VisualStudio.Workload.VCTools" -Wait # ADD --quite in arguments list for installation in backgdround. ADD update in argument list for update installation.
+		Start-Process -FilePath $path_pre$version$path_suf	-ArgumentList "--includeRecommended --add Microsoft.VisualStudio.Workload.VCTools --quiet" -Wait
 	}
 	"`n`tSoftware installation done`n--------------------`n"						# PRINT
 }
