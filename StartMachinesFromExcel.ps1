@@ -11,6 +11,7 @@ Input parameters:
     4) $ResourceGroupColumn (Type: String)   - Name of column containing VM's resource group     (Default: "Owner/Application validation contacts:")
     5) $Subscriptions       (Type: String[]) - Names of subscriptions to log in                  (Mandatory)
     6) $Operation           (Type: String)   - Operation to be performed on VM                   (Default: 'on')
+    7) $GetNotified         (Type: Boolean)  - Get notified when action over all machines done   (Default: 'false')
 
 Example:
     &.\StartMachines.ps1 -ScriptPath "C:\Users\e5639065\OneDrive - FIS\Documents\StartStopAzureVM.ps1" -InputFilePath "C:\Users\e5639065\OneDrive - FIS\Desktop\test.xlsx" -Subscriptions @("FIS Global - CIO - Dev - North America 1", "FIS Global CIO Dev North America 2") -Operation "on"
@@ -41,7 +42,11 @@ param(
 
     [Parameter(Mandatory, HelpMessage='Do you want to turn VMs on or off?[on/off](Default: on)')]
     [String]
-    $Operation = 'on'
+    $Operation = 'on',
+
+    [Parameter(HelpMessage='Get notified when actions over all machines are done')]
+    [Boolean]
+    $GetNotified = 'false'
 )
 
 if(!($Operation -eq 'off')){
@@ -68,10 +73,10 @@ foreach($subscription in $Subscriptions){
     $cnt = $servers.count
     Write-Host "Subscription: $subscription"
     if($Operation -eq 'on'){
-        $resourceGroups, $servers = StartAzureVMs -Subscription $subscription -ResourceGroups $resourceGroups -ResourceNames $servers
+        $resourceGroups, $servers = StartAzureVMs -Subscription $subscription -ResourceGroups $resourceGroups -ResourceNames $servers -WaitForResponse $GetNotified
     }
     else{
-        $resourceGroups, $servers = StopAzureVMs -Subscription $subscription -ResourceGroups $resourceGroups -ResourceNames $servers
+        $resourceGroups, $servers = StopAzureVMs -Subscription $subscription -ResourceGroups $resourceGroups -ResourceNames $servers -WaitForResponse $GetNotified
     }
 
     Write-Host "`t" ($cnt - $servers.count) " vms $Operation"
