@@ -7,7 +7,7 @@ Resource groups and Resource names are passed as pairs and must have same length
 Functions:
     1) StartAzureVMs - Logs in to specific Azure subscription and start specified virtual machines.
         Input parameters: 
-	        1) $Subscription    (Type: String)   - Azure Subscription name                                 (Mandatory)
+	    1) $Subscription    (Type: String)   - Azure Subscription name                                 (Mandatory)
             2) $ResoruceGroups  (Type: String[]) - Azure Resource groups name                              (Mandatory)
             3) $ResourceNames   (Type: String[]) - Azure Resource (Virtual Machine) name                   (Mandatory)
             4) $WaitForResponse (Type: Boolean)  - If true, you will be notified when all machines started (Default: false)
@@ -17,7 +17,7 @@ Functions:
 	
     2) StopAzureVMs - Logs in to specific Azure subscription and stops specified virtual machines.
         Input parameters: 
-	        1) $Subscription    (Type: String)   - Azure Subscription name                                 (Mandatory)
+	    1) $Subscription    (Type: String)   - Azure Subscription name                                 (Mandatory)
             2) $ResoruceGroups  (Type: String[]) - Azure Resource groups name                              (Mandatory)
             3) $ResourceNames   (Type: String[]) - Azure Resource (Virtual Machine) name                   (Mandatory)
             4) $WaitForResponse (Type: Boolean)  - If true, you will be notified when all machines started (Default: false)
@@ -60,14 +60,42 @@ function StartAzureVMs
     .{
         $remainingResources = @()
         $remainingResourceGroups = @()
+        $statuses = @()
         # Log in to Azure
         Connect-AzAccount -Subscription "$Subscription"
         # Try to start every VM and save unsuccessful VMs
         For($I = 0; $I -lt $ResourceGroups.count; $I++){
             try{
-                $res = Start-AzVM -ResourceGroupName $ResourceGroups[$I] -Name $ResourceNames[$I] -NoWait -ErrorAction SilentlyContinue -OutVariable $null
-                if($res -eq $null){
+                $status = ((Get-AzVM -Name $ResourceNames[$I] -ResourceGroupName $ResourceGroups[$I] -Status).Statuses | Where Code -Like 'PowerState/*')[0].DisplayStatus
+                if(($status -eq $null) -or ($status -eq "")){
                     throw WrongSubscriptionException
+                }
+                if($status -ne "VM running"){
+                    Start-AzVM -ResourceGroupName $ResourceGroups[$I] -Name $ResourceNames[$I] -NoWait -ErrorAction SilentlyContinue -OutVariable $null
+                    $statuses += Select-Object -InputObject "" @{
+                            name = "ResourceName";
+                            Expression = {
+                                $ResourceNames[$I]
+                            }
+                        },
+                        @{
+                            name = "ResourceGroup";
+                            Expression = {
+                                $ResourceGroups[$I]
+                            }
+                        },
+                        @{
+                            name = "Subscription";
+                            Expression = {
+                                $Subscription
+                            }
+                        },
+                        @{
+                            name = "status";
+                            Expression = {
+                                $status
+                            }
+                        }
                 }
             }
             catch{
@@ -91,7 +119,7 @@ function StartAzureVMs
         Disconnect-AzAccount -Scope CurrentUser
     } | Out-Null
     # return
-    return $remainingResourceGroups, $remainingResources
+    return $statuses, $remainingResourceGroups, $remainingResources
 }
 
 function StopAzureVMs
@@ -128,9 +156,36 @@ function StopAzureVMs
         # Try to stop every VM and save unsuccessful VMs
         For($I = 0; $I -lt $ResourceGroups.count; $I++){
             try{
-                $res = Stop-AzVM -ResourceGroupName $ResourceGroups[$I] -Name $ResourceNames[$I] -NoWait -Force -ErrorAction SilentlyContinue -OutVariable $null
-                if($res -eq $null){
+                $status = ((Get-AzVM -Name $ResourceNames[$I] -ResourceGroupName $ResourceGroups[$I] -Status).Statuses | Where Code -Like 'PowerState/*')[0].DisplayStatus
+                if(($status -eq $null) -or ($status -eq "")){
                     throw WrongSubscriptionException
+                }
+                if($status -ne "VM deallocated"){
+                    Stop-AzVM -ResourceGroupName $ResourceGroups[$I] -Name $ResourceNames[$I] -NoWait -Force -ErrorAction SilentlyContinue -OutVariable $null
+                    $statuses += Select-Object -InputObject "" @{
+                            name = "ResourceName";
+                            Expression = {
+                                $ResourceNames[$I]
+                            }
+                        },
+                        @{
+                            name = "ResourceGroup";
+                            Expression = {
+                                $ResourceGroups[$I]
+                            }
+                        },
+                        @{
+                            name = "Subscription";
+                            Expression = {
+                                $Subscription
+                            }
+                        },
+                        @{
+                            name = "status";
+                            Expression = {
+                                $status
+                            }
+                        }
                 }
             }
             catch{
@@ -154,5 +209,5 @@ function StopAzureVMs
         Disconnect-AzAccount -Scope CurrentUser
     } | Out-Null
     # return
-    return $remainingResourceGroups, $remainingResources
+    return $statuses, $remainingResourceGroups, $remainingResources
 }

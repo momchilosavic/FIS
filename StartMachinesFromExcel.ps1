@@ -1,8 +1,9 @@
 ﻿<#
-!!! StartStopAzureVM.ps1 SCRIPT IS NECCESSARY FOR EXECUTION OF THIS SCRIPT
+!!! StartStopAzureVM.ps1 SCRIPT IS NECCESSARY FOR EXECUTION OF THIS SCRIPT !!!
 
 This script allows you to read table from excel table, extract VM name and VM resource group from the table and try to start or stop them all.
 After converting data from excel table, using passed subscriptions, script will try to start or stop all VMs contained inside excel table.
+!!! Any script call installs ImportExcel Module if not existing on computer !!!
 
 Input parameters:
     1) $ScriptPath          (Type: String)   - Path to StartStopAzureVM.ps1 script               (Mandatory)
@@ -32,9 +33,13 @@ param(
     [String]
     $NameColumn = "Server",
 
-    [Parameter(HelpMessage='Name of columng containing VM resource group')]
+    [Parameter(HelpMessage='Name of column containing VM resource group')]
     [String]
     $ResourceGroupColumn = "Owner/Application validation contacts:",
+
+    [Parameter(Mandatory, HelpMessage='Path to output Excel file')]
+    [String]
+    $OutputFilePath,
 
     [Parameter(Mandatory)]
     [String[]]
@@ -64,6 +69,7 @@ $table = Import-Excel $InputFilePath
 
 $servers = @()
 $resourceGroups = @()
+$statuses = @()
 foreach($row in $table){
     $servers += $row.$NameColumn
     $resourceGroups += $row.$ResourceGroupColumn  
@@ -73,12 +79,16 @@ foreach($subscription in $Subscriptions){
     $cnt = $servers.count
     Write-Host "Subscription: $subscription"
     if($Operation -eq 'on'){
-        $resourceGroups, $servers = StartAzureVMs -Subscription $subscription -ResourceGroups $resourceGroups -ResourceNames $servers -WaitForResponse $GetNotified
+        $statusesForThisSub, $resourceGroups, $servers = StartAzureVMs -Subscription $subscription -ResourceGroups $resourceGroups -ResourceNames $servers -WaitForResponse $GetNotified
     }
     else{
-        $resourceGroups, $servers = StopAzureVMs -Subscription $subscription -ResourceGroups $resourceGroups -ResourceNames $servers -WaitForResponse $GetNotified
+        $statusesForThisSub, $resourceGroups, $servers = StopAzureVMs -Subscription $subscription -ResourceGroups $resourceGroups -ResourceNames $servers -WaitForResponse $GetNotified
     }
 
     Write-Host "`t" ($cnt - $servers.count) " vms $Operation"
     Write-Host "`t" $servers.count " vms not part of this subscription" 
+
+    $statuses += $statusesForThisSub
 }
+
+$statuses | Export-Excel -Path $OutputFilePath
