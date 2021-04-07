@@ -51,7 +51,16 @@ param(
 
     [Parameter(HelpMessage='Get notified when actions over all machines are done')]
     [Boolean]
-    $GetNotified = 'false'
+    $GetNotified = $False,
+
+    [Boolean]
+    $PromptLogin = $True,
+
+    [System.Management.Automation.PSCredential]
+    $Credentials,
+    
+    [String]
+    $Tenant    
 )
 
 if(!($Operation -eq 'off')){
@@ -79,10 +88,20 @@ foreach($subscription in $Subscriptions){
     $cnt = $servers.count
     Write-Host "Subscription: $subscription"
     if($Operation -eq 'on'){
-        $statusesForThisSub, $resourceGroups, $servers = StartAzureVMs -Subscription $subscription -ResourceGroups $resourceGroups -ResourceNames $servers -WaitForResponse $GetNotified
+        if($PromptLogin){
+            $statusesForThisSub, $resourceGroups, $servers = StartAzureVMs -Subscription $subscription -ResourceGroups $resourceGroups -ResourceNames $servers -WaitForResponse $GetNotified
+        }
+        else{
+            $statusesForThisSub, $resourceGroups, $servers = StartAzureVMs -Subscription $subscription -ResourceGroups $resourceGroups -ResourceNames $servers -WaitForResponse $GetNotified -PromptLogin $PromptLogin -Credentials $Credentials -Tenant $Tenant
+        }
     }
     else{
-        $statusesForThisSub, $resourceGroups, $servers = StopAzureVMs -Subscription $subscription -ResourceGroups $resourceGroups -ResourceNames $servers -WaitForResponse $GetNotified
+        if($PromptLogin){
+            $statusesForThisSub, $resourceGroups, $servers = StopAzureVMs -Subscription $subscription -ResourceGroups $resourceGroups -ResourceNames $servers -WaitForResponse $GetNotified
+        }
+        else{
+            $statusesForThisSub, $resourceGroups, $servers = StoptAzureVMs -Subscription $subscription -ResourceGroups $resourceGroups -ResourceNames $servers -WaitForResponse $GetNotified -PromptLogin $PromptLogin -Credentials $Credentials -Tenant $Tenant
+        }   
     }
 
     Write-Host "`t" ($cnt - $servers.count) " vms $Operation"
@@ -92,3 +111,10 @@ foreach($subscription in $Subscriptions){
 }
 
 $statuses | Export-Excel -Path $OutputFilePath
+
+if($resourceGroups.count -gt 0){
+    Write-Warning "Resources listed below are not part of following subscription(s): $Subscriptions`n`tResoruces:"
+    for($I = 0; $I -lt $resourceGroups.count; $I++){
+        Write-Warning "Resource name: $servers[$I]`tResource Group: $resourceGroups[$I]"
+    }
+}
