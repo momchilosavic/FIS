@@ -11,7 +11,7 @@ Input Parameters:
 	7) $Download - Do you want to download files first
 	8) $InstanceName - Name of SQLServer instance
 
-Author: Momcilo Savic
+Author: Momcilo Savic, Tanja Palic
 Date: 13-Apr-2021
 #>
 
@@ -105,3 +105,4 @@ catch{
 	Write-Error "SSMS installation not succeeded. Terminating script"
 	return;
 }
+

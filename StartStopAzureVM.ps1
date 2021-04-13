@@ -110,7 +110,7 @@ function StartAzureVMs
                 Write-Progress -Id 1 -Activity "Sending requests to start machines" -Status "Completed machines: $($I + 1) of $($ResourceGroups.count)" -PercentComplete (($I + 1) / $ResourceGroups.count * 100);
             }
             try{
-                $status = ((Get-AzVM -Name $ResourceNames[$I] -ResourceGroupName $ResourceGroups[$I] -Status).Statuses | Where Code -Like 'PowerState/*')[0].DisplayStatus
+                $status = ((Get-AzVM -Name $ResourceNames[$I] -ResourceGroupName $ResourceGroups[$I] -Status -ErrorAction SilentlyContinue -OutVariable $null).Statuses | Where Code -Like 'PowerState/*')[0].DisplayStatus
                 if(($status -eq $null) -or ($status -eq "")){
                     throw WrongSubscriptionException
                 }
@@ -236,7 +236,7 @@ function StopAzureVMs
                 Write-Progress -Id 1 -Activity "Sending requests to deallocate machines" -Status "Completed requests: $($I + 1) of $($ResourceGroups.count)" -PercentComplete (($I + 1) / $ResourceGroups.count * 100);
             }
             try{
-                $status = ((Get-AzVM -Name $ResourceNames[$I] -ResourceGroupName $ResourceGroups[$I] -Status).Statuses | Where Code -Like 'PowerState/*')[0].DisplayStatus
+                $status = ((Get-AzVM -Name $ResourceNames[$I] -ResourceGroupName $ResourceGroups[$I] -Status -ErrorAction SilentlyContinue -OutVariable $null).Statuses | Where Code -Like 'PowerState/*')[0].DisplayStatus
                 if(($status -eq $null) -or ($status -eq "")){
                     throw WrongSubscriptionException
                 }
@@ -281,11 +281,11 @@ function StopAzureVMs
             Write-Host("`t->Waiting for all machines to stop")
             $successfulResources = $ResourceNames | Where {$remainingResources -notcontains $_}
             $successfulResourceGroups = $ResourceGroups | Where {$remainingResourceGroups -notcontains $_}
-            for($I = 0; $I -lt $successfulResources.count; $I++){
+            for($I = 0; $I -lt $successfulResourceGroups.count; $I++){
                 if($succesfulResources.count -gt 0){ 
                     Write-Progress -Id 2 -Activity "Waiting for machines" -Status "Complete: $($I + 1) of $($succesfulResources.count)" -PercentComplete (($I + 1) / $succesfulResources.count * 100)
                 }
-                while(((Get-AzVM -Name $successfulResources[$I] -ResourceGroupName $successfulResourceGroups[$I] -Status).Statuses | Where Code -Like 'PowerState/*')[0].DisplayStatus -ne "VM deallocated"){
+                while(((Get-AzVM -Name $successfulResources[$I] -ResourceGroupName $successfulResourceGroups[$I] -Status -ErrorAction SilentlyContinue -OutVariable $null).Statuses | Where Code -Like 'PowerState/*')[0].DisplayStatus -ne "VM deallocated"){
                 # empty loop
                 } 
             }  

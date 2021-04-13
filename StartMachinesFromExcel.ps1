@@ -113,8 +113,14 @@ foreach($subscription in $Subscriptions){
 $statuses | Export-Excel -Path $OutputFilePath
 
 if($resourceGroups.count -gt 0){
-    Write-Warning "Resources listed below are not part of following subscription(s): $Subscriptions`n`tResoruces:"
+    Write-Warning "Could not perfrom action over all machines"
+    Write-Host "Resources listed below are not part of following subscription(s): "
+    Write-Host "`tSubscriptions: "
+    foreach($subscription in $Subscriptions){
+        Write-Host "`t`t$subscription"
+    }
+    Write-Host "`tResources:"
     for($I = 0; $I -lt $resourceGroups.count; $I++){
-        Write-Warning "Resource name: $servers[$I]`tResource Group: $resourceGroups[$I]"
+        Write-Host "`t`tResource name: $($servers[$I])`tResource Group: $($resourceGroups[$I])"
     }
 }
