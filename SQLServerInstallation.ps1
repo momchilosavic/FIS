@@ -75,5 +75,5 @@ Start-Process -FilePath "$env:UserProfile\SQLSERVER\SQLEXPRADV_x64_ENU.exe" -Arg
 Write-Host "SQLServer Installation done"
 
 Write-Host "Installing SSMS" 
-Start-Process -FilePath "$DownloadDirectory\SMSS.exe" -ArgumentList "/install /passive /norestart" -Wait
+Start-Process -FilePath "$DownloadDirectory\SSMS.exe" -ArgumentList "/install /passive /norestart" -Wait
 Write-Host "SSMS Installation done"
