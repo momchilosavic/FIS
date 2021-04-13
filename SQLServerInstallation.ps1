@@ -11,7 +11,7 @@ Input Parameters:
 	7) $Download - Do you want to download files first
 	8) $InstanceName - Name of SQLServer instance
 
-Author: Momcilo Savic
+Author: Momcilo Savic, Tanja Palic
 Date: 13-Apr-2021
 #>
 
@@ -75,5 +75,5 @@ Start-Process -FilePath "$env:UserProfile\SQLSERVER\SQLEXPRADV_x64_ENU.exe" -Arg
 Write-Host "SQLServer Installation done"
 
 Write-Host "Installing SSMS" 
-Start-Process -FilePath "$DownloadDirectory\SMSS.exe" -ArgumentList "/install /passive /norestart" -Wait
+Start-Process -FilePath "$DownloadDirectory\SSMS.exe" -ArgumentList "/install /passive /norestart" -Wait
 Write-Host "SSMS Installation done"
