@@ -50,19 +50,35 @@ if($Download){
 		}
 	}
 
-	Write-Host "Downloading SQLExpress installer from source: $SQLServerSourceUrl has started"
-	Invoke-WebRequest -Uri $SQLServerSourceUrl -OutFile "$DownloadDirectory\SQLServer.exe"
-	Write-Host "Downloading installer from source: $SQLServerSourceUrl succeded"
-	Write-Host "File saved to: $DownloadDirectory\SQLServer.exe"
+	try{
+		Write-Host "Downloading SQLExpress installer from source: $SQLServerSourceUrl has started"
+		Invoke-WebRequest -Uri $SQLServerSourceUrl -OutFile "$DownloadDirectory\SQLServer.exe"
+		Write-Host "Downloading installer from source: $SQLServerSourceUrl succeded"
+		Write-Host "File saved to: $DownloadDirectory\SQLServer.exe"
 	
-	Write-Host "Downloading SSMS from source: $SSMSSourceUrl has started"
-	Invoke-WebRequest -Uri $SSMSSourceUrl -OutFile "$DownloadDirectory\SSMS.exe"
-	Write-Host "Downloading SSMS from source: $SSMSSourceUrl succeded"
-	Write-Host "File saved to: $DownloadDirectory\SSMS.exe"
-	
-	Write-Host "Downloading SQL Server Engine"
-	Start-Process -FilePath "$DownloadDirectory\SQLServer.exe" -ArgumentList "/ACTION=download /MediaType=Advanced /MediaPath=$env:UserProfile\SQLSERVER /Quiet" -Wait
-	Write-Host "Files saved to: $env:UserProfile\SQLSERVER\"
+		Write-Host "Downloading SSMS from source: $SSMSSourceUrl has started"
+		Invoke-WebRequest -Uri $SSMSSourceUrl -OutFile "$DownloadDirectory\SSMS.exe"
+		Write-Host "Downloading SSMS from source: $SSMSSourceUrl succeded"
+		Write-Host "File saved to: $DownloadDirectory\SSMS.exe"
+		
+		Write-Host "Downloading SQL Server Engine"
+		Start-Process -FilePath "$DownloadDirectory\SQLServer.exe" -ArgumentList "/ACTION=download /MediaType=Advanced /MediaPath=$env:UserProfile\SQLSERVER /Quiet" -Wait
+		Write-Host "Files saved to: $env:UserProfile\SQLSERVER\"
+	}
+	catch{
+		if(Test-Path "$DownloadDirectory\SQLServer.exe"){
+			Remove-Item "$DownloadDirectory\SQLServer.exe")
+		}
+		if(Test-Path "$DownloadDirectory\SSMS.exe"){
+			Remove-Item "$DownloadDirectory\SSMS.exe"
+		}
+		if(Test-Path "$env:UserProfile\SQLSERVER"){
+			Remove-Item "$env:UserProfile\SQLSERVER" -Force -Recurse
+		}
+		
+		Write-Error "Download not succeeded. Removing all downloaded content and terminating script"
+		return;
+	}
 }
 
 $users = $null
@@ -70,10 +86,22 @@ ForEach($username in $Usernames){
 	$users += "$Domain\$username "
 }
 
-Write-Host "Installing SQL Express"
-Start-Process -FilePath "$env:UserProfile\SQLSERVER\SQLEXPRADV_x64_ENU.exe" -ArgumentList "/ACTION=install /QS /IACCEPTSQLSERVERLICENSETERMS /UpdateEnabled /INDICATEPROGRESS /FEATURES=SQL,AS,IS,Tools /SECURITYMODE=SQL /SAPWD=$SAPassword /INSTANCENAME=$InstanceName /INSTANCEID=($InstanceName.ToUpper()) /SQLSVCACCOUNT=NT Service\MSSQL`$$InstanceName /SQLSVCPASSWORD=$SAPassword /SQLSYSADMINACCOUNTS=$users /AGTSVCACCOUNT=NT AUTHORITY\Network Service /AGTSVCPASSWORD=$SAPassword /ASSVCACCOUNT=$users /ASSVCPASSWORD=$SAPassword /ISSVCAccount=$users /ISSVCPASSWORD=$SAPassword /ASSYSADMINACCOUNTS=$users" -Wait
-Write-Host "SQLServer Installation done"
+try{
+	Write-Host "Installing SQL Server"
+	Start-Process -FilePath "$env:UserProfile\SQLSERVER\SQLEXPRADV_x64_ENU.exe" -ArgumentList "/ACTION=install /QS /IACCEPTSQLSERVERLICENSETERMS /UpdateEnabled /INDICATEPROGRESS /FEATURES=SQL,AS,IS,Tools /SECURITYMODE=SQL /SAPWD=$SAPassword /INSTANCENAME=$InstanceName /INSTANCEID=($InstanceName.ToUpper()) /SQLSVCACCOUNT=NT Service\MSSQL`$$InstanceName /SQLSVCPASSWORD=$SAPassword /SQLSYSADMINACCOUNTS=$users /AGTSVCACCOUNT=NT AUTHORITY\Network Service /AGTSVCPASSWORD=$SAPassword /ASSVCACCOUNT=$users /ASSVCPASSWORD=$SAPassword /ISSVCAccount=$users /ISSVCPASSWORD=$SAPassword /ASSYSADMINACCOUNTS=$users" -Wait
+	Write-Host "SQLServer Installation done"
+}
+catch{
+	Write-Error "SQLExpress installation not succeeded. Terminating script"
+	return;
+}
 
-Write-Host "Installing SSMS" 
-Start-Process -FilePath "$DownloadDirectory\SSMS.exe" -ArgumentList "/install /passive /norestart" -Wait
-Write-Host "SSMS Installation done"
+try{
+	Write-Host "Installing SSMS" 
+	Start-Process -FilePath "$DownloadDirectory\SSMS.exe" -ArgumentList "/install /passive /norestart" -Wait
+	Write-Host "SSMS Installation done"
+}
+catch{
+	Write-Error "SSMS installation not succeeded. Terminating script"
+	return;
+}
