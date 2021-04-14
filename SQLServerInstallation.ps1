@@ -11,7 +11,7 @@ Input Parameters:
 	7) $Download - Do you want to download files first
 	8) $InstanceName - Name of SQLServer instance
 
-Author: Momcilo Savic, Tanja Palic
+Author: Momcilo Savic
 Date: 13-Apr-2021
 #>
 
@@ -55,27 +55,36 @@ if($Download){
 		Invoke-WebRequest -Uri $SQLServerSourceUrl -OutFile "$DownloadDirectory\SQLServer.exe"
 		Write-Host "Downloading installer from source: $SQLServerSourceUrl succeded"
 		Write-Host "File saved to: $DownloadDirectory\SQLServer.exe"
-	
+	}
+	catch{
+		if(Test-Path "$DownloadDirectory\SQLServer.exe"){
+			Remove-Item "$DownloadDirectory\SQLServer.exe"
+		}
+		Write-Error "Download not succeeded. Removing all downloaded content and terminating script"
+		return;
+	}
+	try{
 		Write-Host "Downloading SSMS from source: $SSMSSourceUrl has started"
 		Invoke-WebRequest -Uri $SSMSSourceUrl -OutFile "$DownloadDirectory\SSMS.exe"
 		Write-Host "Downloading SSMS from source: $SSMSSourceUrl succeded"
 		Write-Host "File saved to: $DownloadDirectory\SSMS.exe"
-		
+	}
+	catch{
+		if(Test-Path "$DownloadDirectory\SSMS.exe"){
+			Remove-Item "$DownloadDirectory\SSMS.exe"
+		}
+		Write-Error "Download not succeeded. Removing all downloaded content and terminating script"
+		return;
+	}
+	try{
 		Write-Host "Downloading SQL Server Engine"
 		Start-Process -FilePath "$DownloadDirectory\SQLServer.exe" -ArgumentList "/ACTION=download /MediaType=Advanced /MediaPath=$env:UserProfile\SQLSERVER /Quiet" -Wait
 		Write-Host "Files saved to: $env:UserProfile\SQLSERVER\"
 	}
 	catch{
-		if(Test-Path "$DownloadDirectory\SQLServer.exe"){
-			Remove-Item "$DownloadDirectory\SQLServer.exe")
-		}
-		if(Test-Path "$DownloadDirectory\SSMS.exe"){
-			Remove-Item "$DownloadDirectory\SSMS.exe"
-		}
 		if(Test-Path "$env:UserProfile\SQLSERVER"){
 			Remove-Item "$env:UserProfile\SQLSERVER" -Force -Recurse
-		}
-		
+		}	
 		Write-Error "Download not succeeded. Removing all downloaded content and terminating script"
 		return;
 	}
@@ -105,4 +114,3 @@ catch{
 	Write-Error "SSMS installation not succeeded. Terminating script"
 	return;
 }
-
